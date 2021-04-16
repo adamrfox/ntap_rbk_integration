@@ -19,7 +19,7 @@ def dprint(message):
         print(message)
 
 def python_input(message):
-    if int(sys.version[0] > 2):
+    if int(sys.version[0]) > 2:
         val = input(message)
     else:
         val = raw_input(message)
