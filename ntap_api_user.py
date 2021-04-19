@@ -11,12 +11,14 @@ import getopt
 import getpass
 
 def usage():
-    print("Usage goes here!")
+    sys.stderr.write("Usage: ntap_api_user.py [-h] [-u user] [-c creds] [-r role] [-p password] svm ntap\n")
+    sys.stderr.write("-h | --help : Prints Usage\n")
+    sys.stderr.write("-c | --creds : NetApp Credentials [user:password]\n")
+    sys.stderr.write("-r | --role : Set role name [default: rubrik]\n")
+    sys.stderr.write("-p | --passoword: Password for rubrik user on NetApp\n")
+    sys.stderr.write("svm : The SVM on the NetApp to whcih the user will be added\n")
+    sys.stderr.write("ntap : Nmame or IP of NetApp cluster management LIF\n")
     exit(0)
-
-def dprint(message):
-    if DEBUG:
-        print(message)
 
 def python_input(message):
     if int(sys.version[0]) > 2:
@@ -40,12 +42,11 @@ if __name__ == "__main__":
 
     user = ""
     password = ""
-    DEBUG = False
     api_user_name = "rubrik"
     api_user_password = ""
     role_name = "rubrik"
 
-    optlist, args = getopt.getopt(sys.argv[1:], 'hu:c:Dr:p:', ['--help', '--user=', '--creds=', '--DEBUG','--role=', '--password='])
+    optlist, args = getopt.getopt(sys.argv[1:], 'hu:c:r:p:', ['--help', '--user=', '--creds=', '--role=', '--password='])
     for opt, a in optlist:
         if opt in ('-h', '--help'):
             usage()
@@ -53,8 +54,6 @@ if __name__ == "__main__":
             api_user_name = a
         if opt in ('-c', '--creds'):
             (user, password) = a.split(':')
-        if opt in ('-D', '--DEBUG'):
-            DEBUG = True
         if opt in ('-r', '--role'):
             role_name = a
         if opt in ('-p', '--password'):
