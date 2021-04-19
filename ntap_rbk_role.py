@@ -11,12 +11,13 @@ import getopt
 import getpass
 
 def usage():
-    print("Usage goes here!")
+    sys.stderr.write("Usage: ntap_rbk_role.py [-h] [-c creds] [-n role_name] svm ntap\n")
+    sys.stderr.write("-h | --help | Prints Usage\n")
+    sys.stderr.write("-c | --creds | NetApp Credentials\n")
+    sys.stderr.write("-n | --name | Set Role Name [default: Rubrik]\n")
+    sys.stderr.write("svm : SVM to which the role will be added\n")
+    sys.stderr.write("ntap : Hostname or IP of cluster management LIF on NetApp\n")
     exit(0)
-
-def dprint(message):
-    if DEBUG:
-        print(message)
 
 def python_input(message):
     if int(sys.version[0]) > 2:
@@ -40,7 +41,6 @@ if __name__ == "__main__":
 
     user = ""
     password = ""
-    DEBUG = False
     role_name = "rubrik"
 
     rbk_role = {
@@ -53,7 +53,7 @@ if __name__ == "__main__":
         'vserver export-policy': 'readonly'
     }
 
-    optlist, args = getopt.getopt(sys.argv[1:], 'hn:c:D', ['--help', '--name=', '--creds-', '--DEBUG'])
+    optlist, args = getopt.getopt(sys.argv[1:], 'hn:c:', ['--help', '--name=', '--creds-'])
     for opt, a in optlist:
         if opt in ('-h', '--help'):
             usage()
@@ -61,8 +61,6 @@ if __name__ == "__main__":
             role_name = a
         if opt in ('-c', '--creds'):
             (user, password) = a.split(':')
-        if opt in ('-D', '--DEBUG'):
-            DEBUG = True
     try:
         (svm, host) = args
     except:
