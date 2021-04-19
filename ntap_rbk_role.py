@@ -11,13 +11,19 @@ import getopt
 import getpass
 
 def usage():
-    sys.stderr.write("Usage: ntap_rbk_role.py [-h] [-c creds] [-n role_name] svm ntap\n")
+    sys.stderr.write("Usage: ntap_rbk_role.py [-hD] [-c creds] [-n role_name] svm ntap\n")
     sys.stderr.write("-h | --help | Prints Usage\n")
+    sys.stderr.write("-D | --debug | Give more verbose output for debugging\n")
     sys.stderr.write("-c | --creds | NetApp Credentials\n")
     sys.stderr.write("-n | --name | Set Role Name [default: Rubrik]\n")
     sys.stderr.write("svm : SVM to which the role will be added\n")
     sys.stderr.write("ntap : Hostname or IP of cluster management LIF on NetApp\n")
     exit(0)
+
+def dprint(message):
+    if DEBUG:
+        print(message + "\n")
+
 
 def python_input(message):
     if int(sys.version[0]) > 2:
@@ -42,6 +48,7 @@ if __name__ == "__main__":
     user = ""
     password = ""
     role_name = "rubrik"
+    DEBUG = False
 
     rbk_role = {
         'DEFAULT': 'none',
@@ -53,10 +60,12 @@ if __name__ == "__main__":
         'vserver export-policy': 'readonly'
     }
 
-    optlist, args = getopt.getopt(sys.argv[1:], 'hn:c:', ['--help', '--name=', '--creds-'])
+    optlist, args = getopt.getopt(sys.argv[1:], 'hDn:c:', ['--help', '--DEBUG', '--name=', '--creds-'])
     for opt, a in optlist:
         if opt in ('-h', '--help'):
             usage()
+        if opt in ('-D', '--DEBUG'):
+            DEBUG = True
         if opt in ('-n', '--name'):
             role_name = a
         if opt in ('-c', '--creds'):
@@ -66,9 +75,9 @@ if __name__ == "__main__":
     except:
         usage()
     if user == "":
-        python_input("User: ")
+        user = python_input("User: ")
     if password == "":
-        getpass.getpass("Password: ")
+        password = getpass.getpass("Password: ")
     try:
         _create_unverified_https_context = ssl._create_unverified_context
     except AttributeError:
@@ -94,3 +103,4 @@ if __name__ == "__main__":
         if result.results_status() == "failed":
             if result.results_errno() != "13130":
                 print(result.sprintf())
+                exit(2)
