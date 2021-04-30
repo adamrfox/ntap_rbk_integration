@@ -126,3 +126,37 @@ if __name__ == "__main__":
         add_priv_to_group(netapp, svm, group_name, required_privs)
     else:
         print("All required privileges are present")
+    if member != "":
+        api = NaElement("cifs-local-group-members-get-iter")
+        xi = NaElement("desired-attributes")
+        api.child_add(xi)
+        xi1 = NaElement("cifs-local-group-members")
+        xi.child_add(xi1)
+        xi1.child_add_string("group-name", group_name)
+        xi1.child_add_string("member", member)
+        xi1.child_add_string("vserver", svm)
+        api.child_add_string("max-records", "100")
+        xi2 = NaElement("query")
+        api.child_add(xi2)
+        out = netapp.invoke_elem(api)
+        if (out.results_status() == "failed"):
+            print("Error:\n")
+            print(out.sprintf())
+            sys.exit(1)
+        group_list = out.child_get("attributes-list").children_get()
+        empty_group = True
+        for group in group_list:
+            name = group.child_get_string("group-name")
+            if name != group_name:
+                continue
+            empty_group = False
+            membership = group.child_get_string("member")
+            membership_list = membership.split()
+            if member in membership_list:
+                print("User " + member + " is alredy a member of " + group_name)
+                exit(0)
+            print("Adding " + member + " to " + group_name)
+        if empty_group:
+            print("Group Empty")
+
+
