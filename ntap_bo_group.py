@@ -10,12 +10,12 @@ import getopt
 import getpass
 
 def usage():
-    print("Usage goes here!")
+    sys.stderr.write("Usage: ntap_bo_group.py [-h] [-c creds] -u user svm\n")
+    sys.stderr.write("-h | --help : Prints this message\n")
+    sys.stderr.write("-c | --creds= : Put SVM creds on the CLI\n")
+    sys.stderr.write("-u | --user= : User to add to the group.  Format: DOMAIN\user\n")
+    sys.stderr.write("svm : host or IP of the SVM.  Either SVM management LIF or Data LIF with mgmt access\n")
     exit(0)
-
-def dprint(message):
-    if DEBUG:
-        print(message + "\n")
 
 
 def python_input(message):
@@ -45,10 +45,7 @@ def add_priv_to_group(netapp,group_name, required_privs):
         xi.child_add_string("cifs-privilege-entries", p)
     api.child_add_string("user-or-group-name", group_name)
     out = netapp.invoke_elem(api)
-    if (out.results_status() == "failed"):
-        print("Error:\n")
-        print(out.sprintf())
-        sys.exit(1)
+    ntap_invoke_err_check(out)
 
 def add_user_to_group(netapp, group_name, member):
     api = NaElement("cifs-local-group-members-add-members")
@@ -57,21 +54,17 @@ def add_user_to_group(netapp, group_name, member):
     api.child_add(xi)
     xi.child_add_string("cifs-name", member)
     out = netapp.invoke_elem(api)
-    if (out.results_status() == "failed"):
-        print("Error:\n")
-        print(out.sprintf())
-        sys.exit(1)
+    ntap_invoke_err_check(out)
 
 if __name__ == "__main__":
     user = ""
     password = ""
     group_name = "BUILTIN\Backup Operators"
     member = ""
-    DEBUG = False
 
     required_privs = ['sebackupprivilege', 'serestoreprivilege', 'sechangenotifyprivilege']
 
-    optlist, args = getopt.getopt(sys.argv[1:], 'hc:u:D', ['--help', '--creds=', '--user=', '--DEBUG'])
+    optlist, args = getopt.getopt(sys.argv[1:], 'hc:u:D', ['--help', '--creds=', '--user='])
     for opt, a in optlist:
         if opt in ('-h', '--help'):
             usage()
@@ -79,8 +72,6 @@ if __name__ == "__main__":
             (user, password) = a.split(':')
         if opt in ('-u', '--user'):
             member = a
-        if opt in ('-D', '--DEBUG'):
-            DEBUG = True
 
     try:
         host = args[0]
@@ -118,10 +109,7 @@ if __name__ == "__main__":
     xi3 = NaElement("query")
     api.child_add(xi3)
     out = netapp.invoke_elem(api)
-    if (out.results_status() == "failed") :
-        print ("Error:\n")
-        print (out.sprintf())
-        sys.exit (1)
+    ntap_invoke_err_check(out)
     out_info = out.child_get("attributes-list").children_get()
     for cp_list in out_info:
         try:
@@ -139,39 +127,6 @@ if __name__ == "__main__":
     else:
         print("All required privileges are present")
     if member != "":
-        api = NaElement("cifs-local-group-members-get-iter")
-        xi = NaElement("desired-attributes")
-        api.child_add(xi)
-        xi1 = NaElement("cifs-local-group-members")
-        xi.child_add(xi1)
-        xi1.child_add_string("group-name", group_name)
-        xi1.child_add_string("member", member)
-#        xi1.child_add_string("vserver", svm)
-        api.child_add_string("max-records", "100")
-        xi2 = NaElement("query")
-        api.child_add(xi2)
-        out = netapp.invoke_elem(api)
-        if (out.results_status() == "failed"):
-            print("Error:\n")
-            print(out.sprintf())
-            sys.exit(1)
-        group_list = out.child_get("attributes-list").children_get()
-        empty_group = True
-        for group in group_list:
-            name = group.child_get_string("group-name")
-            if name != group_name:
-                continue
-            empty_group = False
-            membership = group.child_get_string("member")
-            membership_list = membership.split()
-            if member in membership_list:
-                print("User " + member + " is alredy a member of " + group_name)
-                exit(0)
-            print("Adding " + member + " to " + group_name)
-            add_user_to_group(netapp, group_name, member)
-            break
-        if empty_group:
-            print("Adding " + member + " to " + group_name)
-            add_user_to_group(netapp, group_name, member)
-
+        print("Adding " + member + " to " + group_name)
+        add_user_to_group(netapp, group_name, member)
 
