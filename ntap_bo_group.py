@@ -36,7 +36,7 @@ def ntap_invoke_err_check(out):
             print(out.results_reason() + "\n")
             sys.exit(2)
 
-def add_priv_to_group(netapp, svm, group_name, required_privs):
+def add_priv_to_group(netapp,group_name, required_privs):
     api = NaElement("cifs-privilege-add-privilege")
     xi = NaElement("privileges")
     api.child_add(xi)
@@ -44,6 +44,18 @@ def add_priv_to_group(netapp, svm, group_name, required_privs):
         print ("Adding " + p + " to the group")
         xi.child_add_string("cifs-privilege-entries", p)
     api.child_add_string("user-or-group-name", group_name)
+    out = netapp.invoke_elem(api)
+    if (out.results_status() == "failed"):
+        print("Error:\n")
+        print(out.sprintf())
+        sys.exit(1)
+
+def add_user_to_group(netapp, group_name, member):
+    api = NaElement("cifs-local-group-members-add-members")
+    api.child_add_string("group-name", group_name)
+    xi = NaElement("member-names")
+    api.child_add(xi)
+    xi.child_add_string("cifs-name", member)
     out = netapp.invoke_elem(api)
     if (out.results_status() == "failed"):
         print("Error:\n")
@@ -71,7 +83,7 @@ if __name__ == "__main__":
             DEBUG = True
 
     try:
-        (svm, host) = args
+        host = args[0]
     except:
         usage()
     if user == "":
@@ -84,7 +96,7 @@ if __name__ == "__main__":
         pass
     else:
         ssl._create_default_https_context = _create_unverified_https_context
-    netapp = NaServer(host, 1, 180)
+    netapp = NaServer(host, 1, 160)
     out = netapp.set_transport_type('HTTPS')
     ntap_set_err_check(out)
     out = netapp.set_style('LOGIN')
@@ -101,7 +113,7 @@ if __name__ == "__main__":
     xi1.child_add(xi2)
     xi2.child_add_string("cifs-privilege-entries", "<cifs-privilege-entries>")
     xi1.child_add_string("user-or-group-name", group_name)
-    xi1.child_add_string("vserver", svm)
+#    xi1.child_add_string("vserver", svm)
     api.child_add_string("max-records", "100")
     xi3 = NaElement("query")
     api.child_add(xi3)
@@ -123,7 +135,7 @@ if __name__ == "__main__":
             if plf[2] in required_privs:
                 required_privs.remove(plf[2])
     if required_privs:
-        add_priv_to_group(netapp, svm, group_name, required_privs)
+        add_priv_to_group(netapp, group_name, required_privs)
     else:
         print("All required privileges are present")
     if member != "":
@@ -134,7 +146,7 @@ if __name__ == "__main__":
         xi.child_add(xi1)
         xi1.child_add_string("group-name", group_name)
         xi1.child_add_string("member", member)
-        xi1.child_add_string("vserver", svm)
+#        xi1.child_add_string("vserver", svm)
         api.child_add_string("max-records", "100")
         xi2 = NaElement("query")
         api.child_add(xi2)
@@ -156,7 +168,10 @@ if __name__ == "__main__":
                 print("User " + member + " is alredy a member of " + group_name)
                 exit(0)
             print("Adding " + member + " to " + group_name)
+            add_user_to_group(netapp, group_name, member)
+            break
         if empty_group:
-            print("Group Empty")
+            print("Adding " + member + " to " + group_name)
+            add_user_to_group(netapp, group_name, member)
 
 
