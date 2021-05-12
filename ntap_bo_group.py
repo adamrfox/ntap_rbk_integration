@@ -12,9 +12,9 @@ import getpass
 def usage():
     sys.stderr.write("Usage: ntap_bo_group.py [-h] [-c creds] -u user svm\n")
     sys.stderr.write("-h | --help : Prints this message\n")
-    sys.stderr.write("-c | --creds= : Put SVM creds on the CLI\n")
-    sys.stderr.write("-u | --user= : User to add to the group.  Format: DOMAIN\user\n")
-    sys.stderr.write("svm : host or IP of the SVM.  Either SVM management LIF or Data LIF with mgmt access\n")
+    sys.stderr.write("-c | --creds= : Put SVM creds on the CLI  Format: user:password\n")
+    sys.stderr.write(r"-u | --user= : User to add to the group.  Format: DOMAIN\user")
+    sys.stderr.write("\nsvm : host or IP of the SVM.  Either SVM management LIF or Data LIF with mgmt access\n")
     exit(0)
 
 

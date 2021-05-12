@@ -14,7 +14,7 @@ def usage():
     sys.stderr.write("Usage: ntap_rbk_role.py [-hD] [-c creds] [-n role_name] svm ntap\n")
     sys.stderr.write("-h | --help | Prints Usage\n")
     sys.stderr.write("-D | --debug | Give more verbose output for debugging\n")
-    sys.stderr.write("-c | --creds | NetApp Credentials\n")
+    sys.stderr.write("-c | --creds | NetApp Credentials Format: user:password\n")
     sys.stderr.write("-n | --name | Set Role Name [default: Rubrik]\n")
     sys.stderr.write("svm : SVM to which the role will be added\n")
     sys.stderr.write("ntap : Hostname or IP of cluster management LIF on NetApp\n")
