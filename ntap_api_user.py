@@ -15,9 +15,9 @@ def usage():
     sys.stderr.write("-h | --help : Prints Usage\n")
     sys.stderr.write("-c | --creds : NetApp Credentials [user:password]\n")
     sys.stderr.write("-r | --role : Set role name [default: rubrik]\n")
-    sys.stderr.write("-p | --passoword: Password for rubrik user on NetApp\n")
+    sys.stderr.write("-p | --password: Password for rubrik user on NetApp\n")
     sys.stderr.write("svm : The SVM on the NetApp to whcih the user will be added\n")
-    sys.stderr.write("ntap : Nmame or IP of NetApp cluster management LIF\n")
+    sys.stderr.write("ntap : Name or IP of NetApp cluster management LIF\n")
     exit(0)
 
 def python_input(message):
