@@ -110,18 +110,21 @@ if __name__ == "__main__":
     api.child_add(xi3)
     out = netapp.invoke_elem(api)
     ntap_invoke_err_check(out)
-    out_info = out.child_get("attributes-list").children_get()
-    for cp_list in out_info:
-        try:
-            priv_list = cp_list.child_get("privileges").children_get()
-        except AttributeError:
-            break
-        for priv in priv_list:
-            priv_list = priv.sprintf()
-            pl2 = priv_list.replace('<', '>')
-            plf = pl2.split('>')
-            if plf[2] in required_privs:
-                required_privs.remove(plf[2])
+    try:
+        out_info = out.child_get("attributes-list").children_get()
+        for cp_list in out_info:
+            try:
+                priv_list = cp_list.child_get("privileges").children_get()
+            except AttributeError:
+                break
+            for priv in priv_list:
+                priv_list = priv.sprintf()
+                pl2 = priv_list.replace('<', '>')
+                plf = pl2.split('>')
+                if plf[2] in required_privs:
+                    required_privs.remove(plf[2])
+    except AttributeError:
+        pass
     if required_privs:
         add_priv_to_group(netapp, group_name, required_privs)
     else:
