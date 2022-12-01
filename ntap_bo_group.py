@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+from __future__ import print_function
 import sys
 import urllib3
 urllib3.disable_warnings()
@@ -17,6 +17,14 @@ def usage():
     sys.stderr.write("\nsvm : SVM name of the CIFS server\n")
     sys.stderr.write('netapp : Name/IP of the NTAP cluster management LIF\n')
     exit(0)
+
+def python_input(message):
+    if int(sys.version[0]) > 2:
+        val = input(message)
+    else:
+        val = raw_input(message)
+    return(val)
+
 
 def ntap_auth_headers(user, password):
     auth_s = user + ":" + password
@@ -64,7 +72,7 @@ if __name__ == "__main__":
     except:
         usage()
     if user == "":
-        user = input("NTAP Admin User: ")
+        user = python_input("NTAP Admin User: ")
     if password == "":
         password = getpass.getpass("NTAP Admin Password: ")
     headers = ntap_auth_headers(user, password)
