@@ -3,7 +3,6 @@
 import sys
 import urllib3
 urllib3.disable_warnings()
-from netapp_ontap import NetAppRestError, HostConnection, config, utils
 import getopt
 import getpass
 import base64
